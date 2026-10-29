@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#8E1B2D">
+<title>Satyjy — CRM для продавца</title>
+<style>
+:root{--bg:#F1F1EF;--card:#fff;--ink:#16212B;--mute:#6B7782;--line:#DCDFE2;--red:#8E1B2D;--gold:#C9972B;--ok:#2F855A;--blue:#2B6CB0;--warn:#B7791F}
+@media(prefers-color-scheme:dark){:root{--bg:#12171C;--card:#1B222A;--ink:#EDF0F2;--mute:#9AA6B0;--line:#2B343D}}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+header{background:var(--red);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:1.25rem;letter-spacing:.02em}
+header button{background:transparent;color:#fff;border:1.5px solid #ffffff88;border-radius:8px;padding:4px 12px;font-weight:700}
+.strip{height:6px;background:repeating-linear-gradient(90deg,var(--gold) 0 6px,var(--red) 6px 12px)}
+main{max-width:560px;margin:0 auto;padding:14px}
+h2{font-size:1.1rem;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--mute);border-radius:10px;padding:12px;margin-bottom:10px}
+.card.st-talk{border-left-color:var(--blue)}.card.st-offer{border-left-color:var(--warn)}.card.st-won{border-left-color:var(--ok)}.card.st-lost{opacity:.6}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.chip{font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--line);white-space:nowrap}
+.sub{color:var(--mute);font-size:.9rem}
+.meta{font-size:.85rem;margin-top:2px}.meta.late{color:var(--red);font-weight:700}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;min-height:40px;text-decoration:none;display:inline-flex;align-items:center}
+button.p,.btn.p{background:var(--red);border-color:var(--red);color:#fff;font-weight:700}
+button.d{color:var(--red)}
+input,select,textarea{font:inherit;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+label{display:block;font-size:.85rem;color:var(--mute);margin:10px 0 3px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.empty{text-align:center;color:var(--mute);padding:36px 12px}
+.filters{display:flex;gap:6px;overflow-x:auto;margin:8px 0 12px;padding-bottom:4px}
+.filters button{padding:4px 12px;min-height:34px;white-space:nowrap}.filters .on{background:var(--ink);color:var(--bg)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;border-radius:0;justify-content:center;min-height:56px;position:relative;background:transparent;color:var(--mute)}
+nav .on{color:var(--red);font-weight:700;box-shadow:inset 0 3px var(--red)}
+nav i{font-style:normal;background:var(--gold);color:#000;border-radius:99px;font-size:.7rem;padding:0 6px;margin-left:5px}
+.fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--red);color:#fff;border:0;font-size:2rem;justify-content:center;padding:0;box-shadow:0 4px 12px #0004}
+#m:not(:empty){position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;justify-content:center;z-index:5}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.tp{display:block;width:100%;text-align:left;margin-bottom:6px}.tp.on{border-color:var(--red);box-shadow:inset 0 0 0 1px var(--red)}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.stat b{display:block;font-size:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.hint{font-size:.85rem;color:var(--mute);margin:8px 0}
+header div{display:flex;gap:8px}
+.foot{max-width:560px;margin:0 auto;padding:6px 14px 24px;font-size:.85rem;color:var(--mute)}.foot a,.hint a{color:var(--red);font-weight:700}
+.help ol{padding-left:22px;margin-bottom:12px}.help li{margin-bottom:10px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div><div id="m"></div>
+<script>
+const T={
+ru:{today:'Сегодня',leads:'Клиенты',tpl:'Шаблоны',stats:'Итоги',add:'Новый клиент',edit:'Клиент',name:'Имя',phone:'Телефон (WhatsApp)',product:'Товар',price:'Цена',src:'Откуда пришёл',status:'Этап',next:'Связаться снова',note:'Заметка',save:'Сохранить',del:'Удалить',cancel:'Закрыть',call:'Позвонить',msg:'Написать',snooze:'+3 дня',all:'Все',search:'Поиск',late:'просрочено',due:'связаться',
+st_new:'Новый',st_talk:'Переписка',st_offer:'Предложение',st_won:'Продано',st_lost:'Потерян',
+empty_today:'На сегодня нет напоминаний. Добавьте клиента кнопкой +.',empty_leads:'Клиентов пока нет. Нажмите +, чтобы добавить первого.',
+tnew:'Новый шаблон',ttitle:'Название',tbody:'Текст',thint:'Подстановки: {name} {product} {price}',copy:'Копировать',open:'Открыть WhatsApp',copied:'Скопировано',
+tmsg:'После отправки напоминание перенесётся на +2 дня.',total:'Всего клиентов',won:'Продано',sum:'Сумма продаж',conv:'Конверсия',open_n:'В работе',bysrc:'По источникам',
+backup:'Резервная копия',exp:'Скачать JSON',csv:'Скачать CSV',imp:'Загрузить JSON',impok:'Данные загружены',imperr:'Не удалось прочитать файл',bhint:'Данные хранятся только в этом браузере. Делайте копию раз в неделю.',askdel:'Удалить?',needs:'Укажите имя или телефон',
+help:'Как пользоваться',gotit:'Понятно',h1:'Нажмите + и запишите покупателя: имя, телефон, товар, цену.',h2:'Выберите дату «Связаться снова».',h3:'Во вкладке «Сегодня» — те, кому пора написать.',h4:'Нажмите «Написать»: WhatsApp откроется с готовым текстом.',h5:'Когда купили, смените этап на «Продано».',hfoot:'Данные хранятся только на этом телефоне. Раз в неделю делайте копию во вкладке «Итоги».',promo:'Приложение бесплатное. Настройка под ваш бизнес и новые функции — платно. Пишите:'},
+tm:{today:'Şu gün',leads:'Müşderiler',tpl:'Şablonlar',stats:'Netije',add:'Täze müşderi',edit:'Müşderi',name:'Ady',phone:'Telefon (WhatsApp)',product:'Haryt',price:'Baha',src:'Nireden geldi',status:'Tapgyr',next:'Ýene habarlaşmak',note:'Bellik',save:'Ýatda sakla',del:'Poz',cancel:'Ýap',call:'Jaň et',msg:'Ýaz',snooze:'+3 gün',all:'Hemmesi',search:'Gözleg',late:'wagty geçdi',due:'habarlaş',
+st_new:'Täze',st_talk:'Gepleşik',st_offer:'Teklip',st_won:'Satyldy',st_lost:'Ýitirildi',
+empty_today:'Şu gün ýatlatma ýok. + düwmesi bilen müşderi goşuň.',empty_leads:'Heniz müşderi ýok. Ilkinjisini goşmak üçin + basyň.',
+tnew:'Täze şablon',ttitle:'Ady',tbody:'Tekst',thint:'Orunlar: {name} {product} {price}',copy:'Göçür',open:'WhatsApp aç',copied:'Göçürildi',
+tmsg:'Ibermekden soň ýatlatma +2 güne geçer.',total:'Jemi müşderi',won:'Satyldy',sum:'Satuw jemi',conv:'Konwersiýa',open_n:'Işde',bysrc:'Çeşmeler boýunça',
+backup:'Ätiýaçlyk nusga',exp:'JSON ýükle',csv:'CSV ýükle',imp:'JSON goş',impok:'Maglumat ýüklendi',imperr:'Faýl okalmady',bhint:'Maglumat diňe şu brauzerde saklanýar. Hepdede bir gezek nusga alyň.',askdel:'Pozmalymy?',needs:'Ady ýa-da telefony ýazyň',
+help:'Nädip ulanmaly',gotit:'Düşnükli',h1:'+ düwmesine basyp müşderini ýazyň: ady, telefony, haryt, baha.',h2:'«Ýene habarlaşmak» senesini saýlaň.',h3:'«Şu gün» bölüminde habarlaşmaly adamlar görünýär.',h4:'«Ýaz» düwmesi WhatsApp-y taýýar tekst bilen açýar.',h5:'Satylandan soň tapgyry «Satyldy» edip üýtgediň.',hfoot:'Maglumat diňe şu telefonda saklanýar. Hepdede bir gezek «Netije» bölüminde nusga alyň.',promo:'Programma mugt. Işiňize görä sazlamak we täze mümkinçilikler tölegli. Ýazyň:'}};
+const ST=['new','talk','offer','won','lost'],SRC=['TikTok','Instagram','Telegram','WhatsApp','TM CARS','Other'];
+const defTpl=()=>[
+{id:1,title:'Привет / Salam',body:'Salam, {name}! {product} barada ýazanyňyz üçin sag boluň. Bahasy: {price}. Sargyt bermekçimi?\n\nЗдравствуйте, {name}! Спасибо за интерес к «{product}». Цена: {price}. Оформляем заказ?'},
+{id:2,title:'Напомнить / Ýatlat',body:'Salam, {name}! {product} hakda gürleşipdik. Henizem gyzyklanýarsyňyzmy?\n\nЗдравствуйте, {name}! Мы обсуждали «{product}». Вопрос ещё актуален?'},
+{id:3,title:'Спасибо / Sag boluň',body:'Satyn alanyňyz üçin sag boluň, {name}! Soragyňyz bolsa, ýazyň.\n\nСпасибо за покупку, {name}! Если будут вопросы — пишите.'}];
+const blank=()=>({lang:'ru',cur:'TMT',leads:[],tpls:defTpl()});
+function load(){try{const d=JSON.parse(localStorage.getItem('satyjy'));if(d&&d.leads)return d}catch(e){}return blank()}
+let S=load(),tab='today',flt='all',q='',mem='';
+function save(){try{localStorage.setItem('satyjy',JSON.stringify(S))}catch(e){}}
+const t=k=>(T[S.lang]||T.ru)[k]||k;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const today=()=>iso(new Date());
+const plus=n=>{const d=new Date();d.setDate(d.getDate()+n);return iso(d)};
+const wa=p=>{let d=(p||'').replace(/\D/g,'');if(d.length==8&&d[0]=='6')d='993'+d;return d};
+const money=n=>n?n+' '+S.cur:'';
+const open_=l=>l.status!='won'&&l.status!='lost';
+const dueList=()=>S.leads.filter(l=>open_(l)&&l.next&&l.next<=today()).sort((a,b)=>a.next<b.next?-1:1);
+const fill=(s,l)=>s.replace(/\{name\}/g,l.name||'').replace(/\{product\}/g,l.product||'').replace(/\{price\}/g,money(l.price)||'');
+const $=id=>document.getElementById(id);
+const modal=h=>{$('m').innerHTML=h?'<div class="sheet">'+h+'</div>':''};
+
+function card(l){
+ const late=l.next&&l.next<today()&&open_(l);
+ const nxt=l.next&&open_(l)?`<div class="meta ${late?'late':''}">${esc(l.next)} · ${late?t('late'):t('due')}</div>`:'';
+ return `<article class="card st-${l.status}"><div class="top"><b>${esc(l.name||l.phone)}</b><span class="chip">${t('st_'+l.status)}</span></div>
+ <div class="sub">${esc([l.product,money(l.price),l.src].filter(Boolean).join(' · '))}</div>${nxt}
+ ${l.note?`<div class="sub">${esc(l.note)}</div>`:''}
+ <div class="acts">${l.phone?`<a class="btn" href="tel:+${wa(l.phone)}">${t('call')}</a><button class="p" data-act="msg" data-id="${l.id}">${t('msg')}</button>`:''}
+ <button data-act="snooze" data-id="${l.id}">${t('snooze')}</button><button data-act="edit" data-id="${l.id}">⋯</button></div></article>`;
+}
+function listHTML(){
+ let a=S.leads.slice().sort((x,y)=>(y.created||0)-(x.created||0));
+ if(flt!='all')a=a.filter(l=>l.status==flt);
+ if(q){const s=q.toLowerCase();a=a.filter(l=>[l.name,l.phone,l.product,l.note].join(' ').toLowerCase().includes(s))}
+ return a.length?a.map(card).join(''):`<p class="empty">${t('empty_leads')}</p>`;
+}
+function view(){
+ if(tab=='today'){const d=dueList();return `<h2>${t('today')}: ${d.length}</h2>`+(d.length?d.map(card).join(''):`<p class="empty">${t('empty_today')}</p>`)}
+ if(tab=='leads')return `<input id="q" placeholder="${t('search')}" value="${esc(q)}"><div class="filters">${['all',...ST].map(s=>`<button data-act="flt" data-k="${s}" class="${flt==s?'on':''}">${s=='all'?t('all'):t('st_'+s)}</button>`).join('')}</div><div id="list">${listHTML()}</div>`;
+ if(tab=='tpl')return `<h2>${t('tpl')}</h2><p class="hint">${t('thint')}</p>`+S.tpls.map(x=>`<button class="tp" data-act="tedit" data-id="${x.id}"><b>${esc(x.title)}</b><div class="sub">${esc(x.body.slice(0,80))}…</div></button>`).join('')+`<button class="p" data-act="tedit">+ ${t('tnew')}</button>`;
+ const w=S.leads.filter(l=>l.status=='won'),sum=w.reduce((s,l)=>s+(+l.price||0),0),n=S.leads.length;
+ const bs=SRC.map(s=>{const a=S.leads.filter(l=>l.src==s);return a.length?`<tr><td>${s}</td><td>${a.length}</td><td>${a.filter(l=>l.status=='won').length}</td></tr>`:''}).join('');
+ return `<div class="stat"><div><b>${n}</b>${t('total')}</div><div><b>${S.leads.filter(open_).length}</b>${t('open_n')}</div><div><b>${w.length}</b>${t('won')}</div><div><b>${n?Math.round(w.length/n*100):0}%</b>${t('conv')}</div></div>
+ <div class="card"><b>${t('sum')}: ${sum} ${S.cur}</b></div>
+ ${bs?`<h2>${t('bysrc')}</h2><table><tr><th></th><th>${t('total')}</th><th>${t('won')}</th></tr>${bs}</table>`:''}
+ <h2 style="margin-top:20px">${t('backup')}</h2><p class="hint">${t('bhint')}</p>
+ <div class="acts"><button data-act="exp">${t('exp')}</button><button data-act="csv">${t('csv')}</button><button data-act="imp">${t('imp')}</button></div><input type="file" id="f" accept=".json" hidden>`;
+}
+function render(){
+ document.documentElement.lang=S.lang=='tm'?'tk':'ru';
+ const d=dueList().length;
+ $('app').innerHTML=`<header><h1>Satyjy</h1><div><button data-act="help" aria-label="${t('help')}">?</button> <button data-act="lang">${S.lang.toUpperCase()}</button></div></header><div class="strip"></div><main>${view()}</main><footer class="foot">${t('promo')} <a href="https://t.me/Yusupmur" target="_blank" rel="noopener">@Yusupmur</a></footer>
+ <nav>${['today','leads','tpl','stats'].map(k=>`<button data-act="tab" data-k="${k}" class="${tab==k?'on':''}">${t(k)}${k=='today'&&d?`<i>${d}</i>`:''}</button>`).join('')}</nav>
+ <button class="fab" data-act="add" aria-label="${t('add')}">+</button>`;
+}
+function leadForm(id){
+ const l=S.leads.find(x=>x.id==id)||{status:'new',next:plus(1),src:'TikTok'};
+ modal(`<h2>${id?t('edit'):t('add')}</h2>
+ <label>${t('name')}</label><input id="f_name" value="${esc(l.name)}">
+ <label>${t('phone')}</label><input id="f_phone" type="tel" inputmode="tel" placeholder="+993 6X XXXXXX" value="${esc(l.phone)}">
+ <div class="row"><div><label>${t('product')}</label><input id="f_product" value="${esc(l.product)}"></div><div><label>${t('price')}</label><input id="f_price" type="number" inputmode="decimal" value="${esc(l.price)}"></div></div>
+ <div class="row"><div><label>${t('src')}</label><select id="f_src">${SRC.map(s=>`<option ${l.src==s?'selected':''}>${s}</option>`).join('')}</select></div>
+ <div><label>${t('status')}</label><select id="f_status">${ST.map(s=>`<option value="${s}" ${l.status==s?'selected':''}>${t('st_'+s)}</option>`).join('')}</select></div></div>
+ <label>${t('next')}</label><input id="f_next" type="date" value="${esc(l.next)}">
+ <label>${t('note')}</label><textarea id="f_note" rows="2">${esc(l.note)}</textarea>
+ <div class="acts"><button class="p" data-act="lsave" data-id="${id||''}">${t('save')}</button><button data-act="close">${t('cancel')}</button>${id?`<button class="d" data-act="ldel" data-id="${id}">${t('del')}</button>`:''}</div>`);
+}
+function lsave(id){
+ const v=k=>$('f_'+k).value.trim();
+ if(!v('name')&&!v('phone')){alert(t('needs'));return}
+ const o={name:v('name'),phone:v('phone'),product:v('product'),price:v('price'),src:v('src'),status:v('status'),next:v('next'),note:v('note')};
+ if(id){const l=S.leads.find(x=>x.id==id);Object.assign(l,o)}else S.leads.push({id:Date.now(),created:Date.now(),...o});
+ save();modal('');render();
+}
+function msgSheet(id){
+ const l=S.leads.find(x=>x.id==id);mem=id;
+ modal(`<h2>${esc(l.name||l.phone)}</h2>${S.tpls.map(x=>`<button class="tp" data-act="use" data-id="${x.id}">${esc(x.title)}</button>`).join('')}
+ <textarea id="txt" rows="6" placeholder="…"></textarea><p class="hint">${t('tmsg')}</p>
+ <div class="acts"><button class="p" data-act="wasend">${t('open')}</button><button data-act="copy">${t('copy')}</button><button data-act="close">${t('cancel')}</button></div>`);
+ if(S.tpls[0])$('txt').value=fill(S.tpls[0].body,l);
+}
+function tplForm(id){
+ const x=S.tpls.find(z=>z.id==id)||{title:'',body:''};
+ modal(`<h2>${id?t('tpl'):t('tnew')}</h2><label>${t('ttitle')}</label><input id="t_title" value="${esc(x.title)}">
+ <label>${t('tbody')}</label><textarea id="t_body" rows="8">${esc(x.body)}</textarea><p class="hint">${t('thint')}</p>
+ <div class="acts"><button class="p" data-act="tsave" data-id="${id||''}">${t('save')}</button><button data-act="close">${t('cancel')}</button>${id?`<button class="d" data-act="tdel" data-id="${id}">${t('del')}</button>`:''}</div>`);
+}
+function helpSheet(){
+ modal(`<div class="help"><h2>${t('help')}</h2><ol>${[1,2,3,4,5].map(i=>`<li>${t('h'+i)}</li>`).join('')}</ol><p class="hint">${t('hfoot')}</p><p class="hint">${t('promo')} <a href="https://t.me/Yusupmur" target="_blank" rel="noopener">@Yusupmur</a></p>
+ <div class="acts"><button class="p" data-act="close">${t('gotit')}</button></div></div>`);
+}
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const a=b.dataset.act,id=b.dataset.id,k=b.dataset.k;
+ if(a=='tab'){tab=k;render()}
+ else if(a=='lang'){S.lang=S.lang=='ru'?'tm':'ru';save();render()}
+ else if(a=='flt'){flt=k;render()}
+ else if(a=='add')leadForm();
+ else if(a=='help')helpSheet();
+ else if(a=='edit')leadForm(id);
+ else if(a=='close')modal('');
+ else if(a=='lsave')lsave(id);
+ else if(a=='ldel'){if(confirm(t('askdel'))){S.leads=S.leads.filter(x=>x.id!=id);save();modal('');render()}}
+ else if(a=='snooze'){S.leads.find(x=>x.id==id).next=plus(3);save();render()}
+ else if(a=='msg')msgSheet(id);
+ else if(a=='use'){const l=S.leads.find(x=>x.id==mem);$('txt').value=fill(S.tpls.find(x=>x.id==id).body,l);document.querySelectorAll('.tp').forEach(n=>n.classList.toggle('on',n===b))}
+ else if(a=='wasend'){const l=S.leads.find(x=>x.id==mem);window.open('https://wa.me/'+wa(l.phone)+'?text='+encodeURIComponent($('txt').value),'_blank');
+  if(l.status=='new')l.status='talk';l.next=plus(2);save();modal('');render()}
+ else if(a=='copy'){const v=$('txt').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>{b.textContent=t('copied')}).catch(()=>{$('txt').select();document.execCommand('copy');b.textContent=t('copied')})}
+ else if(a=='tedit')tplForm(id);
+ else if(a=='tsave'){const o={title:$('t_title').value.trim(),body:$('t_body').value.trim()};if(!o.title||!o.body)return;
+  if(id)Object.assign(S.tpls.find(x=>x.id==id),o);else S.tpls.push({id:Date.now(),...o});save();modal('');render()}
+ else if(a=='tdel'){if(confirm(t('askdel'))){S.tpls=S.tpls.filter(x=>x.id!=id);save();modal('');render()}}
+ else if(a=='exp')dl('satyjy-'+today()+'.json',JSON.stringify(S),'application/json');
+ else if(a=='csv'){const h=['name','phone','product','price','src','status','next','note'];
+  const r=S.leads.map(l=>h.map(c=>'"'+String(l[c]||'').replace(/"/g,'""')+'"').join(','));dl('satyjy-'+today()+'.csv','\ufeff'+h.join(',')+'\n'+r.join('\n'),'text/csv')}
+ else if(a=='imp')$('f').click();
+});
+document.addEventListener('input',e=>{if(e.target.id=='q'){q=e.target.value;$('list').innerHTML=listHTML()}});
+document.addEventListener('change',e=>{if(e.target.id=='f'&&e.target.files[0]){const r=new FileReader();
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.leads)throw 0;S=Object.assign(blank(),d);save();render();alert(t('impok'))}catch(x){alert(t('imperr'))}};r.readAsText(e.target.files[0])}});
+render();
+if(!S.seen){S.seen=1;save();helpSheet()}
+</script>
+</body>
+</html>
